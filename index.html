@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego del Ahorcado</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .bienvenida {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .ahorcado-dibujo {
+            text-align: center;
+            font-size: 80px;
+            height: 100px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .palabra-enmascarada {
+            text-align: center;
+            font-size: 2.5em;
+            letter-spacing: 10px;
+            margin: 30px 0;
+            font-weight: bold;
+            color: #333;
+            min-height: 60px;
+        }
+
+        .info {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            gap: 20px;
+        }
+
+        .info-item {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .info-item h3 {
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .info-item p {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .letras-usadas {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.1em;
+            color: #666;
+            min-height: 30px;
+        }
+
+        .teclado {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+            gap: 8px;
+            margin: 30px 0;
+        }
+
+        .letra-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 15px 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .letra-btn:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .letra-btn:disabled {
+            background: #ddd;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .mensaje {
+            text-align: center;
+            font-size: 1.3em;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mensaje.correcto {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .mensaje.incorrecto {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .mensaje.victoria {
+            background: #d4edda;
+            color: #155724;
+            font-size: 1.5em;
+        }
+
+        .mensaje.derrota {
+            background: #f8d7da;
+            color: #721c24;
+            font-size: 1.5em;
+        }
+
+        .btn-reiniciar {
+            background: #764ba2;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        .btn-reiniciar:hover {
+            background: #5a3780;
+        }
+
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .palabra-enmascarada {
+                font-size: 2em;
+                letter-spacing: 5px;
+            }
+
+            .teclado {
+                grid-template-columns: repeat(7, 1fr);
+            }
+
+            .letra-btn {
+                padding: 12px 5px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Ahorcado</h1>
+        <p class="bienvenida">¡Bienvenido al juego del ahorcado!</p>
+        
+        <div class="ahorcado-dibujo" id="dibujo">😊</div>
+        
+        <div class="palabra-enmascarada" id="palabraEnmascarada"></div>
+        
+        <div class="info">
+            <div class="info-item">
+                <h3>Intentos restantes</h3>
+                <p id="intentos">6</p>
+            </div>
+            <div class="info-item">
+                <h3>Letras usadas</h3>
+                <p id="letrasUsadas">-</p>
+            </div>
+        </div>
+
+        <div class="mensaje" id="mensaje"></div>
+
+        <div class="teclado" id="teclado"></div>
+
+        <button class="btn-reiniciar" id="btnReiniciar" onclick="reiniciarJuego()">🔄 Nueva Palabra</button>
+    </div>
+
+    <script>
+        // Lista de palabras para el juego
+        const palabras = [
+            "programacion", "ordenador", "javascript", "desarrollo", "teclado",
+            "pantalla", "internet", "navegador", "aplicacion", "software",
+            "hardware", "algoritmo", "variable", "funcion", "bucle",
+            "python", "diseño", "interfaz", "usuario", "sistema",
+            "archivo", "carpeta", "documento", "ventana", "boton",
+            "elefante", "jirafa", "mariposa", "delfin", "aguila",
+            "montaña", "oceano", "bosque", "desierto", "volcán",
+            "guitarra", "piano", "violin", "trompeta", "bateria"
+        ];
+
+        // Variables del juego
+        let palabraSecreta = "";
+        let palabraEnmascarada = "";
+        let letrasUsadas = [];
+        let intentosRestantes = 6;
+        let juegoTerminado = false;
+
+        // Emojis del ahorcado
+        const dibujos = ["😊", "😐", "😟", "😨", "😰", "😵", "💀"];
+
+        // Función para normalizar (eliminar acentos)
+        function normalizar(cadena) {
+            return cadena.toLowerCase().trim()
+                .replace(/[áä]/g, 'a')
+                .replace(/[éë]/g, 'e')
+                .replace(/[íï]/g, 'i')
+                .replace(/[óö]/g, 'o')
+                .replace(/[úü]/g, 'u');
+        }
+
+        // Función para elegir palabra aleatoria
+        function elegirPalabra() {
+            return palabras[Math.floor(Math.random() * palabras.length)];
+        }
+
+        // Función para ocultar la palabra
+        function ocultar(palabra, letras) {
+            let resultado = "";
+            for (let letra of palabra) {
+                if (letras.includes(letra)) {
+                    resultado += letra;
+                } else {
+                    resultado += "_";
+                }
+            }
+            return resultado;
+        }
+
+        // Función para comprobar si ha ganado
+        function haGanado(palabraEnmascarada) {
+            return !palabraEnmascarada.includes("_");
+        }
+
+        // Función para crear el teclado
+        function crearTeclado() {
+            const teclado = document.getElementById("teclado");
+            teclado.innerHTML = "";
+            const letras = "abcdefghijklmnñopqrstuvwxyz".split("");
+            
+            letras.forEach(letra => {
+                const btn = document.createElement("button");
+                btn.className = "letra-btn";
+                btn.textContent = letra;
+                btn.onclick = () => pulsarLetra(letra);
+                btn.id = `btn-${letra}`;
+                teclado.appendChild(btn);
+            });
+        }
+
+        // Función para actualizar la visualización
+        function actualizarVisualizacion() {
+            document.getElementById("palabraEnmascarada").textContent = 
+                palabraEnmascarada.split("").join(" ");
+            document.getElementById("intentos").textContent = intentosRestantes;
+            document.getElementById("letrasUsadas").textContent = 
+                letrasUsadas.length > 0 ? letrasUsadas.join(", ").toUpperCase() : "-";
+            document.getElementById("dibujo").textContent = dibujos[6 - intentosRestantes];
+        }
+
+        // Función para mostrar mensaje
+        function mostrarMensaje(texto, tipo) {
+            const mensaje = document.getElementById("mensaje");
+            mensaje.textContent = texto;
+            mensaje.className = `mensaje ${tipo}`;
+            
+            if (tipo === "correcto" || tipo === "incorrecto") {
+                setTimeout(() => {
+                    mensaje.textContent = "";
+                    mensaje.className = "mensaje";
+                }, 2000);
+            }
+        }
+
+        // Función cuando se pulsa una letra
+        function pulsarLetra(letra) {
+            if (juegoTerminado) return;
+
+            letra = normalizar(letra);
+            
+            // Deshabilitar el botón
+            document.getElementById(`btn-${letra}`).disabled = true;
+            
+            // Añadir a letras usadas
+            letrasUsadas.push(letra);
+
+            // Comprobar si la letra está en la palabra
+            if (palabraSecreta.includes(letra)) {
+                mostrarMensaje("✅ ¡Bien! La letra está en la palabra", "correcto");
+                palabraEnmascarada = ocultar(palabraSecreta, letrasUsadas);
+                
+                // Comprobar si ha ganado
+                if (haGanado(palabraEnmascarada)) {
+                    juegoTerminado = true;
+                    mostrarMensaje(`🎉 ¡Enhorabuena, has ganado! La palabra era: ${palabraSecreta.toUpperCase()}`, "victoria");
+                    deshabilitarTeclado();
+                }
+            } else {
+                mostrarMensaje("❌ La letra no está en la palabra", "incorrecto");
+                intentosRestantes--;
+                
+                // Comprobar si ha perdido
+                if (intentosRestantes === 0) {
+                    juegoTerminado = true;
+                    mostrarMensaje(`😞 Has perdido. La palabra era: ${palabraSecreta.toUpperCase()}`, "derrota");
+                    deshabilitarTeclado();
+                    // Mostrar la palabra completa
+                    document.getElementById("palabraEnmascarada").textContent = 
+                        palabraSecreta.split("").join(" ").toUpperCase();
+                }
+            }
+
+            actualizarVisualizacion();
+        }
+
+        // Función para deshabilitar todos los botones del teclado
+        function deshabilitarTeclado() {
+            const botones = document.querySelectorAll(".letra-btn");
+            botones.forEach(btn => btn.disabled = true);
+        }
+
+        // Función para reiniciar el juego
+        function reiniciarJuego() {
+            palabraSecreta = normalizar(elegirPalabra());
+            palabraEnmascarada = ocultar(palabraSecreta, []);
+            letrasUsadas = [];
+            intentosRestantes = 6;
+            juegoTerminado = false;
+            
+            crearTeclado();
+            actualizarVisualizacion();
+            
+            document.getElementById("mensaje").textContent = "";
+            document.getElementById("mensaje").className = "mensaje";
+        }
+
+        // Iniciar el juego al cargar la página
+        reiniciarJuego();
+    </script>
+</body>
+</html>
